@@ -45,7 +45,7 @@
 				</section>
 
 				<section>
-					<p><small><i>There is none. They are mostly of point-free!</i></small></p>
+					<p><small><i>There is none. They are mostly point-free!</i></small></p>
 				</section>
 
 				<section>
@@ -135,8 +135,10 @@ keepHalfPointFree = ap (take . flip (div . length) 2) id
 
 				<section>
 					<h3>Motivation</h3>
-					<img src="point-free.png" style="max-height: 150px;" />
-					<p style="text-align: right"><small><cite><a href="https://trends.google.com/trends/explore?date=all&q=point-free">https://trends.google.com/trends/explore?date=all&q=point-free</a></cite></small></p>
+					<span class="fragment">
+						<img src="point-free.png" style="max-height: 150px;" />
+						<p style="text-align: right"><small><cite><a href="https://trends.google.com/trends/explore?date=all&q=point-free">https://trends.google.com/trends/explore?date=all&q=point-free</a></cite></small></p>
+					</span>
 					
 					<span class="fragment">
 						<img src="tacit-programming.png" style="max-height: 150px;" />
@@ -152,7 +154,7 @@ keepHalfPointFree = ap (take . flip (div . length) 2) id
 				</section>
 
 				<section>
-					<h3>Combinators?</h3>
+					<h3>Combinator?</h3>
 					<q>
 						A function or definition with no free variables == A pure lambda-expression that refers only to its arguments
 					</q>
@@ -194,7 +196,7 @@ keepHalfPointFree = ap (take . flip (div . length) 2) id
 				</section>
 
 				<section>
-					<h3>K?</h3>
+					<h3>Sidetrack: K?</h3>
 					<p>Lambda calculus is sometimes also called <b>λK-calculus</b>, meaning that in combinator logic there’s a <b>K</b> combinator involved.</p>
 					<pre><code>K x y = x</code></pre>
 					<p><b>K</b> is <i>cancellative</i>, it doesn’t use one of it’s arguments.</p>
