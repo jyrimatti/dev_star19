@@ -1,0 +1,467 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>The point of birds</title>
+
+		<meta name="description" content="About point-free style, tacit programming and combinator logic">
+		<meta name="author" content="Jyri-Matti 'Jüppe' Lähteenmäki">
+
+		<link rel="stylesheet" href="css/reset.css">
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/moon.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<style>
+			.reveal .footer {
+				color: gray;
+				position: absolute;
+				top: 1em;
+				right: 1em;
+				font-size: 0.4em;
+			}
+			i { font-style: italic; }
+		</style>
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section><h2>The point of birds</h2>
+					<p><a href="https://twitter.com/jyrimatti">@jyrimatti</a></p>
+					<img src="bird.jpg" width="200em" />
+				</section>
+
+				<section>
+					<p><small><i>There is none. They are mostly of point-free!</i></small></p>
+				</section>
+
+				<section>
+					<h3>Point?</h3>
+					<p>.</p>
+					<span class="fragment">
+						<p>or<br /> as in point-free programming,<br /> a point is a function argument</p>
+						<pre><code class="java">
+public static final void myFunction(String x) {...}
+                                           ↑
+						</code></pre>
+					</span>
+				</section>
+
+				<section>
+					<h3>Point-free programming?</h3>
+					<p>== tacit programming</p>
+					<q>
+						a programming paradigm in which function definitions do not identify the arguments (or "points") on which they operate. Instead the definitions merely compose other functions, among which are combinators that manipulate the arguments.
+					</q>
+					<p style="text-align: right"><small><cite><a href="https://en.wikipedia.org/wiki/Tacit_programming">https://en.wikipedia.org/wiki/Tacit_programming</a></cite></small></p>
+				</section>
+
+				<section>
+					<h3>Example 1</h3>
+					<p>unix pipes</p>
+					<pre><code style="max-height: 500px">
+echo "hello old" | tr "h" "H" | sed s/old/world/ 
+					</code></pre>
+					<span class="fragment">
+						<p>which in Java could be:</p>
+						<pre><code class="java">
+Function&lt;String,String> f1 = str -> str.replace('h', 'H');
+Function&lt;String,String> f2 = str -> str.replace("old", "world");
+f1.andThen(f2).apply("hello old");
+						</code></pre>
+					</span>
+				</section>
+				
+				<section>
+					<h3>Example 2</h3>
+					<p>Haskell</p>
+					<pre class="fragment"><code class="haskell">
+keepEven list             = filter (\x -> x `mod` 2 == 0) list
+					</code></pre>
+					<pre class="fragment"><code class="haskell">
+keepEvenPointFree         = filter (\x -> x `mod` 2 == 0)
+					</code></pre>
+					<pre class="fragment"><code class="haskell">
+keepEvenEvenMorePointFree = filter ((== 0) . (`mod` 2))
+					</code></pre>
+					<p class="fragment">If you know Haskell and partial application,<br /> the last one is perfectly readable.</p>
+				</section>
+
+				<section>
+					<h3>Eta-conversion</h3>
+					<p>== eta-reduction and eta-abstraction</p>
+					<span class="fragment">
+						<p>Point-free style can be obtained via eta-reduction:<br />\x -> abs x ==> abs</p>
+						<p>The opposite of eta-abstraction:<br />abs ==> \x -> abs x</p>
+					</span>
+					<p class="fragment">Conversion to (at least some) point-free form can be automated: <a href="http://pointfree.io">http://pointfree.io</a></p>
+				</section>
+
+				<section>
+					<h3>Example 3</h3>
+					<pre><code class="haskell">
+keepHalf list = take (length list `div` 2) list
+					</code></pre>
+					<span class="fragment">
+						<pre><code class="bash">
+> nix-shell -p haskellPackages.pointfree --run \
+  "pointfree -v '\list -> take (length list \`div\` 2) list'"
+						</code></pre>
+						<pre><code class="haskell">
+keepHalfPointFree = ap (take . flip (div . length) 2) id
+						</code></pre>
+						<p>🤔 Wait a second, that doesn’t look simple or easy!</p>
+					</span>
+					<small class="fragment">
+						<q>
+							Point-free style can (clearly) lead to Obfuscation when used unwisely. ... Perhaps these are why pointfree style is sometimes (often?) referred to as <b>pointless style</b>.
+						</q>
+						<p style="text-align: right"><small><cite><a href="https://wiki.haskell.org/Pointfree">https://wiki.haskell.org/Pointfree</a></cite></small></p>
+					</small>
+				</section>
+
+				<section>
+					<h3>Motivation</h3>
+					<img src="point-free.png" style="max-height: 150px;" />
+					<p style="text-align: right"><small><cite><a href="https://trends.google.com/trends/explore?date=all&q=point-free">https://trends.google.com/trends/explore?date=all&q=point-free</a></cite></small></p>
+					
+					<span class="fragment">
+						<img src="tacit-programming.png" style="max-height: 150px;" />
+						<p style="text-align: right"><small><cite><a href="https://trends.google.com/trends/explore?date=all&q=tacit%20programming">https://trends.google.com/trends/explore?date=all&q=tacit%20programming</a></cite></small></p>
+					</span>
+				</section>
+
+				<section>
+					<p>Uh, didn't look too good...</p>
+					<img src="combinators.png" style="max-height: 150px;" />
+					<p style="text-align: right"><small><cite><a href="https://trends.google.com/trends/explore?date=all&q=combinator">https://trends.google.com/trends/explore?date=all&q=combinator</a></cite></small></p>
+					<p>Let’s use this one!</p>
+				</section>
+
+				<section>
+					<h3>Combinators?</h3>
+					<q>
+						A function or definition with no free variables == A pure lambda-expression that refers only to its arguments
+					</q>
+					<p style="text-align: right"><small><cite><a href="https://wiki.haskell.org/Combinator">https://wiki.haskell.org/Combinator</a></cite></small></p>
+					<q>
+						A combinator is a higher-order function that uses only function application and earlier defined combinators to define a result from its arguments.
+					</q>
+					<p style="text-align: right"><small><cite><a href="https://en.wikipedia.org/wiki/Combinatory_logic">https://en.wikipedia.org/wiki/Combinatory_logic</a></cite></small></p>
+					<pre><code class="haskell">
+\a -> a
+\a -> \b -> a
+\f -> \a -> \b -> f b a
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Lambda expression?</h3>
+					<q>
+						It is perhaps surprising that lambda-calculus can represent any conceivable computation using only the simple notions of function abstraction and application based on simple textual substitution of terms for variables. But even more remarkable is that abstraction is not even required. Combinatory logic is a model of computation equivalent to lambda calculus, but without abstraction.
+					</q>
+					<p style="text-align: right"><small><cite><a href="https://en.wikipedia.org/wiki/Combinatory_logic">https://en.wikipedia.org/wiki/Combinatory_logic</a></cite></small></p>
+				</section>
+
+				<section>
+					<h3>Combinatory logic?</h3>
+					<p>no abstraction == no creation of lambdas<br /> == no function arguments</p>
+					<p>But the example combinators on the previous slide were lambdas themselves!?!</p>
+					<p>Yes, but we assume that there exists a primitive set of combinators, from which more can be built without lambda abstraction.</p>
+				</section>
+
+				<section>
+					<h3>How big is this primitive set?</h3>
+					<ul>
+						<li class="fragment">S-K-I<br /><a href="https://en.wikipedia.org/wiki/SKI_combinator_calculus">https://en.wikipedia.org/wiki/SKI_combinator_calculus</a></li>
+						<li class="fragment">or just S-K (since I == SKK)</li>
+						<li class="fragment">B-C-K-W<br /><a href="https://en.wikipedia.org/wiki/B,_C,_K,_W_system">https://en.wikipedia.org/wiki/B,_C,_K,_W_system</a></li>
+						<li class="fragment">or just one of infinitely many one-point bases<br /><a href="https://www.sciencedirect.com/science/article/pii/S0020019003005416">https://www.sciencedirect.com/science/article/pii/S0020019003005416</a></li>
+					</ul>
+				</section>
+
+				<section>
+					<h3>K?</h3>
+					<p>Lambda calculus is sometimes also called <b>λK-calculus</b>, meaning that in combinator logic there’s a <b>K</b> combinator involved.</p>
+					<pre><code>K x y = x</code></pre>
+					<p><b>K</b> is <i>cancellative</i>, it doesn’t use one of it’s arguments.</p>
+					<p>In <b>λI-calculus</b>, there’s no <b>K</b><br /> (that is, all arguments must be used)</p>
+				</section>
+
+				<section>
+					<h3>Naming things is hard?</h3>
+					<p>Single-letter-names are a bit mathy.</p>
+					<p class="fragment" data-fragment-index="1">Raymond m. Smullyan: <a href="https://en.m.wikipedia.org/wiki/To_Mock_a_Mockingbird">To Mock a Mockingbird</a></p>
+					<small><small><dl>
+						<dt class="fragment" data-fragment-index="2">I</dt>
+						<dd class="fragment" data-fragment-index="2">Idiot x = x</dd>
+						<dt class="fragment" data-fragment-index="3">K</dt>
+						<dd class="fragment" data-fragment-index="3">Kestrel x y = x</dd>
+						<dt class="fragment" data-fragment-index="4">I*</dt>
+						<dd class="fragment" data-fragment-index="4">IdiotOnceRemoved x y = x y</dd>
+						<dt class="fragment" data-fragment-index="5">T</dt>
+						<dd class="fragment" data-fragment-index="5">Thrust x y = y x</dd>
+						<dt class="fragment" data-fragment-index="6">C</dt>
+						<dd class="fragment" data-fragment-index="6">Cardinal x y z = x z y</dd>
+						<dt class="fragment" data-fragment-index="7">B</dt>
+						<dd class="fragment" data-fragment-index="7">Bluebird x y z = x (y z)</dd>
+						<dt class="fragment" data-fragment-index="8">Q</dt>
+						<dd class="fragment" data-fragment-index="8">Queer x y z = y (x z)</dd>
+						<dt class="fragment" data-fragment-index="9">B</dt>
+						<dd class="fragment" data-fragment-index="9">Blackbird x y z w = x (y z w)</dd>
+						<dt class="fragment" data-fragment-index="9">...</dt>
+					</dl></small></small>
+					<span class="fragment" data-fragment-index="9">
+						<p style="position: absolute; left: -11em; top: -3em; width: 20em; font-size: 0.25em;"><a href="https://commons.wikimedia.org/wiki/File:Kestrel1.jpg#/media/File:Kestrel1.jpg"><img src="kestrel.jpg" alt="Kestrel1.jpg"></a><br>By <a href="https://en.wikipedia.org/wiki/User:Ryser915" class="extiw" title="w:User:Ryser915">Ryser915</a> at <a href="https://en.wikipedia.org/wiki/" class="extiw" title="w:">English Wikipedia</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0" title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=61228443">Link</a></p>
+						<p style="position: absolute; left: 5em; top: 21em; width: 20em; font-size: 0.25em;"><a href="https://commons.wikimedia.org/wiki/File:Psophocichla_litsitsirupa_(Etosha).jpg#/media/File:Psophocichla_litsitsirupa_(Etosha).jpg"><img src="thrust.jpg" alt="Medium sized songbird stands upright with greyish upperbody, blackened wings, white underparts streaked with black, a white face with a prominent black crescent behind the eye and black line running from the eye down, and grey bill with yellow below"></a><br>By <a href="//commons.wikimedia.org/wiki/User:Yathin_sk" title="User:Yathin sk">Yathin S Krishnappa</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="https://creativecommons.org/licenses/by-sa/3.0" title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=25417270">Link</a></p>
+						<p style="position: absolute; right: -12em; top: 31em; width: 20em; font-size: 0.25em;"><a href="https://commons.wikimedia.org/wiki/File:Northern_Cardinal_Broadside.jpg#/media/File:Northern_Cardinal_Broadside.jpg"><img src="cardinal.jpg" alt="Northern Cardinal Broadside.jpg"></a><br>By <a href="//commons.wikimedia.org/w/index.php?title=User:Dakota_L.&amp;action=edit&amp;redlink=1" class="new" title="User:Dakota L. (page does not exist)">Dakota L.</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="https://creativecommons.org/licenses/by-sa/3.0" title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=32827839">Link</a></p>
+						<p style="position: absolute; right: 11em; top: 22em; width: 20em; font-size: 0.25em;"><a href="https://commons.wikimedia.org/wiki/File:Eastern_Bluebird.jpg#/media/File:Eastern_Bluebird.jpg"><img src="bluebird.jpg" alt="Eastern Bluebird.jpg"></a><br>By <a href="//commons.wikimedia.org/wiki/User:Dehaan" title="User:Dehaan">Dehaan</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="https://creativecommons.org/licenses/by-sa/3.0" title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=5518262">Link</a></p>
+						<p style="position: absolute; right: -14em; top: -1em; width: 20em; font-size: 0.25em;"><a href="https://commons.wikimedia.org/wiki/File:Turdus_merula_-Gran_Canaria,_Canary_Islands,_Spain-8_(2).jpg#/media/File:Turdus_merula_-Gran_Canaria,_Canary_Islands,_Spain-8_(2).jpg"><img src="blackbird.jpg" alt="Turdus merula -Gran Canaria, Canary Islands, Spain-8 (2).jpg"></a><br>By <a rel="nofollow" class="external text" href="https://www.flickr.com/photos/22009023@N03">Juan Emilio</a> from Las Palmas de Gran Canaria, España - <a rel="nofollow" class="external text" href="https://www.flickr.com/photos/juan_e/5438889863/">Mirlo. (Turdus merula cabrerae.)(♂)</a>Uploaded by <a href="//commons.wikimedia.org/wiki/User:Snowmanradio" title="User:Snowmanradio">Snowmanradio</a>, <a href="https://creativecommons.org/licenses/by-sa/2.0" title="Creative Commons Attribution-Share Alike 2.0">CC BY-SA 2.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=14512312">Link</a></p>
+					</span>
+				</section>
+
+				<section>
+					<h3>A combinator for <i>keepHalf</i>?</h3>
+					<pre><code class="haskell">
+keepHalf list     = take (length list `div` 2) list
+keepHalfPointFree = ap (take . flip (div . length) 2) id
+					</code></pre>
+					<span class="fragment">
+						<p><small>phoenix == <i>pass a single value through two different functions,<br /> and pass the results to a two-parameter function</i></small></p>
+						<pre><code class="haskell">
+phoenix x y z w = x (y w) (z w)
+keepHalfCombi = phoenix take ((`div` 2) . length) id
+						</code></pre>
+					</span>
+					<span class="fragment">
+						<p><small>starling == <i>pass a single value straight and also through a function, to a two-parameter function</i></small></p>
+						<pre><code class="haskell">
+starling = x y z = x z (y z)
+keepHalfCombi2 = starling (flip take) ((`div` 2) . length)
+						</code></pre>
+					</span>
+				</section>
+				
+				<section>
+					<p><small>cardinal' == <i>pass first argument straight, and second argument through a function,<br /> to a two-parameter function</i></small></p>
+					<p><small>warbler == <i>elementary duplicator</i></small></p>
+					<pre><code class="haskell">
+cardinal' x y z w = x (y w) z
+warbler x y = x y y
+keepHalfCombi3 = warbler $ cardinal' take ((`div` 2) . length)
+					</code></pre>
+					<span class="fragment">
+						<p>There might be a day, when these are taught in the universities and we all know all these combinators by heart!</p>
+						<p>...meanwhile, is there something easier?</p>
+					</span>
+				</section>
+
+				<section>
+					<p>Starling == <i>Applicative's (<*>) on functions</i></p>
+					<p>Like ordinary application of <i>take</i> with two arguments:</p>
+					<pre><code class="haskell">
+keepHalf list = take (length list `div` 2) list
+					</code></pre>
+					<span class="fragment">
+						<p>but instead we use kind of <i>lifted function application</i>,<br /> syntactically with operators <$> and <*>:</p>
+						<pre><code class="haskell">
+keepHalfApplicative = take <$> ((`div` 2) . length) <*> id
+						</code></pre>
+					</span>
+					<span class="fragment">
+						<p>This is actually readable!</p>
+						<p>By abstracting over function application in our language, we might not even need the operators...</p>
+					</span>
+				</section>
+
+				<section>
+					<h3>Visualisation</h3>
+					<p>Can be visualised as data flow</p>
+					<img src="graph.svg" />
+					<span class="fragment">
+						<small><pre><code>
+nix-shell --pure -p graphviz --run 'echo "digraph g{\
+	rankdir=\"LR\";\
+	\"input-list\" -> \"((\`div\` 2) . length)\";\
+	\"((\`div\` 2) . length)\" -> \"take :: Int -> [a] -> [a]\";\
+	\"input-list\" -> \"take :: Int -> [a] -> [a]\";\
+	\"take :: Int -> [a] -> [a]\" -> \"result-list\"\
+}" | dot -Tsvg > graph.svg'
+						</code></pre></small>
+						<p>Imagine your editor/IDE to automatically visualize all Applicative-function usages with this kind of (even interactive) graphics!</p>
+					</span>
+				</section>
+
+				<section>
+					<h2>a missing bird?</h2>
+					<p>Each previous example had something awkward</p>
+					<span class="fragment">
+						<pre><code class="haskell">
+missingBird :: (b -> a -> c) -> (a -> b) -> a -> c
+missingBird x y z = x (y z) z
+
+keepHalfCombi4 = missingBird take ((`div` 2) . length)
+						</code></pre>
+						<p>I couldn't find references to this kind of combinator...?</p>
+					</span>
+				</section>
+
+				<section>
+					<h3>Example 4</h3>
+					<small><pre><code class="haskell" style="width: 700px;">
+-- from Haskell base:
+sortBy :: (a -> a -> Ordering) -> [a] -> [a]
+
+someListOfTuples = [(1,'a'), (2,'b')]
+
+sortedByNumberVerbose = sortBy (\t1 t2 -> compare (fst t1) (fst t2)) someListOfTuples
+					</code></pre></small>
+					<p class="fragment">Do we happen to have a combinator for:<br /> <i>Pass both parameters through same function,<br /> and pass the results to a two-parameter function</i>?</p>
+					<small class="fragment"><pre><code class="haskell" style="width: 600px;">
+psi x y z w = x (y z) (y w)
+sortedByNumberCombinator = sortBy (psi compare fst) someListOfTuples
+					</code></pre></small>
+				</section>
+
+				<section>
+					<p>This need was recognised ages ago</p>
+					<p>There’s already a psi bird with a different name in Haskell base: <b>on</b> </p>
+					<pre><code class="haskell" style="width: 950px">
+-- http://hackage.haskell.org/package/base/docs/Data-Function.html#v:on
+sortedByNumberOn = sortBy (compare `on` fst) someListOfTuples
+					</code></pre>
+					<span class="fragment">
+						<img src="graph2.svg" />
+						<small><pre><code>
+nix-shell --pure -p graphviz --run 'echo "digraph g{\
+	rankdir=LR;\
+	\"compare\" -> \"on :: (b -> b -> Ordering) -> (a -> b) -> a -> a -> Ordering\";\
+	\"fst\" -> \"on :: (b -> b -> Ordering) -> (a -> b) -> a -> a -> Ordering\";\
+	\"on :: (b -> b -> Ordering) -> (a -> b) -> a -> a -> Ordering\" -> \"sortBy :: (a -> a -> Ordering) -> [a] -> [a]\";\
+	\"input-list\" -> \"sortBy :: (a -> a -> Ordering) -> [a] -> [a]\";\
+	\"sortBy :: (a -> a -> Ordering) -> [a] -> [a]\" -> \"result-list\"\
+}" | dot -Tsvg > graph2.svg'
+						</code></pre></small>
+					</span>
+				</section>
+
+				<section>
+					<h3>Example 5</h3>
+					<p><a href="https://www.youtube.com/watch?v=seVSlKazsNk">"Point-Free or Die: Tacit Programming in Haskell and Beyond"</a> by Amar Shah</p>
+					<p>aggregation == <i>first map over the function f,<br /> then sum the resulting numbers</i></p>
+					<span class="fragment">
+						<pre><code class="haskell">
+aggregate f list = sum (map f list)
+						</code></pre>
+						<p>in point-free style?</p>
+					</span>
+					<pre class="fragment"><code class="haskell">
+aggregate f = sum . map f
+aggregate   = (sum .) . map
+					</code></pre>
+				</section>
+
+				<section>
+					<p>
+						Would we happen to have a combinator for:<br /> <i>pass two parameters to a two-parameter function, and then pass the result to a one-parameter function</i>?
+					</p>
+					<span class="fragment">
+						<pre><code class="haskell">
+blackbird x y z w = x (y z w)
+						</code></pre>
+						<p>blackbird == <i>composition of composition and composition</i></p>
+						<p>(.) . (.)</p>
+						<p>Yeah right, but the visualisation is clear</p>
+						<img src="graph3.svg" />
+					</span>
+				</section>
+
+				<section>
+					<h3>a coincidence?</h3>
+					<p>A function with the same type signature as blackbird happens to be <a href="https://hoogle.haskell.org/?hoogle=%28c+-%3E+d%29+-%3E+%28a+-%3E+b+-%3E+c%29+-%3E+a+-%3E+b+-%3E+d&scope=set%3Astackage">defined in multiple Hackage packages</a> with different name.</p>
+					<p>Could it be useful to have it defined in base with a suitable name, like that suggested by Amar Shah:</p>
+					<pre><code class="haskell">
+f ... g = (f .) . g
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Summary</h3>
+					<small><ul>
+						<li class="fragment">Point-free style == tacit programming == no function arguments</li>
+						<li class="fragment">Point-free style can be extremely readable</li>
+						<li class="fragment">Excessive use of point-free style is bad for readability<br />
+							    - especially if one blindly takes what automatic tools provide</li>
+						<li class="fragment">Knowledge of some basic building blocks is needed to figure out proper abstractions<br />
+							    - why oh why don’t they teach these to everyone in the university?</li>
+						<li class="fragment">Combinators are often communicated by using names of specific birds</li>
+						<li class="fragment">Higher-level abstractions built from combinators might be more useful. For example:<br />
+							    - Applicative Functor of functions is awesome<br />
+							    - `on`<br />
+							    - blackbird
+						</li>
+						<li class="fragment">Using point-free style might bring opportunities for code visualisation</li>
+					</ul></small>
+				</section>
+
+				<section>
+					<h3>Links & References</h3>
+					<small><ul>
+						<li><a href="https://blog.lahteenmaki.net/combinator-birds.html">My table of combinators</a> (might contain errors)</li>
+
+						<li>Recommended read: <a href="https://en.m.wikipedia.org/wiki/To_Mock_a_Mockingbird">To Mock a Mockingbird and Other Logic Puzzles: Including an Amazing Adventure in Combinatory Logic</a> by Raymond Smullyan 
+							<br />which is <a href="https://archive.org/details/Raymond_m._smullyan-to_mock_a_mockingbird_and_other_logic_puzzles__including__an">free-to-download</a></li>
+
+						<li>Recommended presentation: <a href="https://www.youtube.com/watch?v=seVSlKazsNk">Point-Free or Die: Tacit Programming in Haskell and Beyond</a> by Amar Shah</li>
+
+						<li>https://en.wikipedia.org/wiki/Tacit_programming</li>
+						<li>http://pointfree.io</li>
+						<li>http://hackage.haskell.org/package/data-aviary-0.4.0/docs/Data-Aviary-Birds.html</li>
+						<li>https://wiki.haskell.org/Pointfree</li>
+						<li>https://en.wikipedia.org/wiki/Combinatory_logic</li>
+						<li>http://www.angelfire.com/tx4/cus/combinator/birds.html</li>
+						<li>http://dkeenan.com/Lambda/index.htm</li>
+					</ul></small>
+				</section>
+
+				<section>
+					<p>Forget that cutting edge JavaScript framework!<br />Learn you a fundamental tool for great good!</p>
+					<p>Thank you.</p>
+				</section>
+			</div>
+
+			<div class="footer">
+				link to this presentation: <a href="https://lahteenmaki.net/dev_*19/">https://lahteenmaki.net/dev_*19/</a>
+			</div>	
+		</div>
+
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true }
+				]
+			});
+		</script>
+	</body>
+</html>
